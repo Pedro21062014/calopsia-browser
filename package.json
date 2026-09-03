@@ -1,0 +1,84 @@
+{
+  "name": "calopsia-browser",
+  "version": "1.0.0",
+  "description": "Calopsia – A professional Chromium-based browser built with Electron",
+  "main": "src/main/main.js",
+  "author": "Calopsia Team",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder -mwl",
+    "dist": "npm run build:all",
+    "lint": "eslint src/**/*.js",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "electron": "^29.1.0",
+    "electron-builder": "^24.13.3",
+    "eslint": "^8.57.0"
+  },
+  "build": {
+    "appId": "com.calopsia.browser",
+    "productName": "Calopsia",
+    "copyright": "Copyright © 2025 Calopsia Team",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] },
+        { "target": "zip", "arch": ["x64", "arm64"] }
+      ],
+      "icon": "assets/icons/icon.icns",
+      "darkModeSupport": true,
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist"
+    },
+    "linux": {
+      "target": [
+        { "target": "AppImage", "arch": ["x64", "arm64"] },
+        { "target": "deb", "arch": ["x64"] },
+        { "target": "rpm", "arch": ["x64"] }
+      ],
+      "icon": "assets/icons/",
+      "category": "Network;WebBrowser",
+      "maintainer": "Calopsia Team"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64", "ia32"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "assets/icons/icon.ico",
+      "publisherName": "Calopsia Team"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Calopsia"
+    },
+    "dmg": {
+      "title": "Calopsia Browser",
+      "background": "assets/dmg-background.png",
+      "window": { "width": 540, "height": 380 }
+    }
+  }
+}

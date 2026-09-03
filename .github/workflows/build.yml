@@ -1,0 +1,179 @@
+name: 🚀 Build & Release Calopsia Browser
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Build macOS ─────────────────────────────────────────────────────────────
+  build-mac:
+    name: 🍎 macOS (x64 + arm64)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build macOS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npm run build:mac
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: calopsia-mac
+          path: |
+            dist/*.dmg
+            dist/*.zip
+          retention-days: 5
+
+  # ── Build Windows ────────────────────────────────────────────────────────────
+  build-win:
+    name: 🪟 Windows (x64 + ia32)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:win
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: calopsia-win
+          path: |
+            dist/*.exe
+            dist/*.msi
+          retention-days: 5
+
+  # ── Build Linux ──────────────────────────────────────────────────────────────
+  build-linux:
+    name: 🐧 Linux (x64 + arm64)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+          npm ci
+
+      - name: Build Linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:linux
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: calopsia-linux
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
+          retention-days: 5
+
+  # ── GitHub Release ───────────────────────────────────────────────────────────
+  release:
+    name: 📦 Publish GitHub Release
+    needs: [build-mac, build-win, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: calopsia-mac
+          path: release-assets/
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: calopsia-win
+          path: release-assets/
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: calopsia-linux
+          path: release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Calopsia ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: release-assets/**
+          body: |
+            ## 🌐 Calopsia Browser ${{ github.ref_name }}
+
+            A professional Chromium-based browser built with Electron.
+
+            ### 📥 Downloads
+
+            | Platform | Architecture | File |
+            |----------|-------------|------|
+            | 🍎 macOS | Intel (x64) | `.dmg` |
+            | 🍎 macOS | Apple Silicon (arm64) | `.dmg` |
+            | 🪟 Windows | x64 | `.exe` (NSIS installer) |
+            | 🪟 Windows | ia32 | `.exe` (NSIS installer) |
+            | 🪟 Windows | x64 | `-portable.exe` |
+            | 🐧 Linux | x64 / arm64 | `.AppImage` |
+            | 🐧 Linux | x64 | `.deb` |
+            | 🐧 Linux | x64 | `.rpm` |
+
+            ### ✨ Features
+            - Built-in ad & tracker blocker
+            - Multi-tab browsing
+            - Bookmarks & History
+            - Download manager
+            - Find in page
+            - Dark mode UI
+            - Cross-platform (macOS, Windows, Linux)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+npm-debug.log*
+.env
+.env.*
+out/
+release/
+assets/icons/icon.icns
+assets/icons/icon.ico
+assets/dmg-background.png

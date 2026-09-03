@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <title>Calopsia Browser</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ── Browser Chrome ─────────────────────────────────────────────────── -->
+  <div id="browser-chrome" class="browser-chrome">
+
+    <!-- Title Bar (window drag region + traffic lights on non-mac) -->
+    <div id="title-bar" class="title-bar">
+      <div class="window-controls" id="window-controls">
+        <button class="wc-btn wc-close"    id="btn-close"    title="Close"></button>
+        <button class="wc-btn wc-minimize" id="btn-minimize" title="Minimize"></button>
+        <button class="wc-btn wc-maximize" id="btn-maximize" title="Maximize"></button>
+      </div>
+      <div class="tabs-wrapper" id="tabs-wrapper">
+        <div class="tabs-scroll" id="tabs-container"></div>
+        <button class="tab-add-btn" id="btn-new-tab" title="New tab">
+          <svg viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="nav-bar" id="nav-bar">
+      <!-- Left nav controls -->
+      <div class="nav-actions left">
+        <button class="nav-btn" id="btn-back"    title="Back (Alt+←)">
+          <svg viewBox="0 0 20 20"><polyline points="13 4 7 10 13 16"/></svg>
+        </button>
+        <button class="nav-btn" id="btn-forward" title="Forward (Alt+→)">
+          <svg viewBox="0 0 20 20"><polyline points="7 4 13 10 7 16"/></svg>
+        </button>
+        <button class="nav-btn" id="btn-reload"  title="Reload (Ctrl+R)">
+          <svg viewBox="0 0 20 20"><path d="M4.5 10a5.5 5.5 0 1 0 1.2-3.4"/><polyline points="4 4 4 8 8 8"/></svg>
+        </button>
+        <button class="nav-btn" id="btn-home"    title="Home">
+          <svg viewBox="0 0 20 20"><path d="M3 9.5 10 3l7 6.5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><polyline points="8 18 8 12 12 12 12 18"/></svg>
+        </button>
+      </div>
+
+      <!-- Address / Search Bar -->
+      <div class="address-bar-wrap" id="address-bar-wrap">
+        <span class="security-icon" id="security-icon">
+          <svg viewBox="0 0 20 20"><path d="M10 2 3 5.5v5c0 4.1 3 7.9 7 9 4-1.1 7-4.9 7-9v-5z"/></svg>
+        </span>
+        <input
+          type="text"
+          id="address-bar"
+          class="address-bar"
+          placeholder="Search or enter address…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="addr-action" id="btn-bookmark-current" title="Bookmark this page">
+          <svg viewBox="0 0 20 20" id="bookmark-star"><polygon points="10 2 12.4 7.6 18.5 8.2 14 12.3 15.4 18.3 10 15.3 4.6 18.3 6 12.3 1.5 8.2 7.6 7.6"/></svg>
+        </button>
+      </div>
+
+      <!-- Right nav actions -->
+      <div class="nav-actions right">
+        <button class="nav-btn" id="btn-downloads" title="Downloads">
+          <svg viewBox="0 0 20 20"><polyline points="10 3 10 14"/><polyline points="5 10 10 15 15 10"/><line x1="3" y1="17" x2="17" y2="17"/></svg>
+        </button>
+        <button class="nav-btn" id="btn-bookmarks" title="Bookmarks">
+          <svg viewBox="0 0 20 20"><path d="M5 3h10a1 1 0 0 1 1 1v13l-6-4-6 4V4a1 1 0 0 1 1-1z"/></svg>
+        </button>
+        <button class="nav-btn" id="btn-history" title="History">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><polyline points="10 6 10 10 13 12"/></svg>
+        </button>
+        <button class="nav-btn" id="btn-settings" title="Settings">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.5"/><path d="M10 1v3M10 16v3M1 10h3M16 10h3M3.22 3.22l2.12 2.12M14.66 14.66l2.12 2.12M3.22 16.78l2.12-2.12M14.66 5.34l2.12-2.12"/></svg>
+        </button>
+        <button class="nav-btn" id="btn-menu" title="More options">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="5" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="10" cy="15" r="1.2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Find in page bar -->
+    <div class="find-bar hidden" id="find-bar">
+      <input type="text" id="find-input" placeholder="Find in page…" />
+      <span id="find-count"></span>
+      <button id="btn-find-prev">↑</button>
+      <button id="btn-find-next">↓</button>
+      <button id="btn-find-close">✕</button>
+    </div>
+  </div>
+
+  <!-- ── Panels (Bookmarks / History / Downloads / Settings) ─────────────── -->
+  <div class="panel-overlay hidden" id="panel-overlay"></div>
+
+  <!-- Bookmarks Panel -->
+  <div class="side-panel hidden" id="panel-bookmarks">
+    <div class="panel-header">
+      <span>Bookmarks</span>
+      <button class="panel-close" data-panel="panel-bookmarks">✕</button>
+    </div>
+    <div class="panel-body" id="bookmarks-list"></div>
+  </div>
+
+  <!-- History Panel -->
+  <div class="side-panel hidden" id="panel-history">
+    <div class="panel-header">
+      <span>History</span>
+      <div>
+        <button class="panel-action-btn" id="btn-clear-history">Clear All</button>
+        <button class="panel-close" data-panel="panel-history">✕</button>
+      </div>
+    </div>
+    <div class="panel-body" id="history-list"></div>
+  </div>
+
+  <!-- Downloads Panel -->
+  <div class="side-panel hidden" id="panel-downloads">
+    <div class="panel-header">
+      <span>Downloads</span>
+      <button class="panel-close" data-panel="panel-downloads">✕</button>
+    </div>
+    <div class="panel-body" id="downloads-list"></div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="side-panel wide hidden" id="panel-settings">
+    <div class="panel-header">
+      <span>Settings</span>
+      <button class="panel-close" data-panel="panel-settings">✕</button>
+    </div>
+    <div class="panel-body settings-body">
+      <section class="settings-section">
+        <h3>General</h3>
+        <label class="setting-row">
+          <span>Homepage</span>
+          <input type="text" id="setting-homepage" placeholder="https://…" />
+        </label>
+        <label class="setting-row">
+          <span>Search Engine</span>
+          <select id="setting-search">
+            <option value="https://www.google.com/search?q=">Google</option>
+            <option value="https://search.brave.com/search?q=">Brave</option>
+            <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+            <option value="https://www.bing.com/search?q=">Bing</option>
+            <option value="https://search.yahoo.com/search?p=">Yahoo</option>
+          </select>
+        </label>
+      </section>
+      <section class="settings-section">
+        <h3>Privacy & Security</h3>
+        <label class="setting-row toggle-row">
+          <span>Ad & Tracker Blocker</span>
+          <label class="toggle">
+            <input type="checkbox" id="setting-adblock" />
+            <span class="slider"></span>
+          </label>
+        </label>
+        <label class="setting-row toggle-row">
+          <span>Dark Mode</span>
+          <label class="toggle">
+            <input type="checkbox" id="setting-darkmode" checked />
+            <span class="slider"></span>
+          </label>
+        </label>
+      </section>
+      <section class="settings-section">
+        <h3>Data</h3>
+        <button class="settings-btn danger" id="btn-clear-all-history">Clear Browsing History</button>
+        <button class="settings-btn danger" id="btn-clear-bookmarks">Clear All Bookmarks</button>
+      </section>
+      <section class="settings-section">
+        <h3>About</h3>
+        <p class="about-text">Calopsia Browser · v1.0.0<br/>Built on Electron + Chromium</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- Context menu -->
+  <div class="ctx-menu hidden" id="ctx-menu"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
