@@ -7,6 +7,4 @@ npm-debug.log*
 .env.*
 out/
 release/
-assets/icons/icon.icns
-assets/icons/icon.ico
 assets/dmg-background.png
